@@ -1,4 +1,6 @@
-﻿/**
+﻿/*global enyo */
+
+/**
 
 enyo.TabBar.Item is a special button for TabBar. This widget is
 designed to be used only within TabBar.
@@ -12,6 +14,7 @@ enyo.kind ({
 	events: {
 		onTabActivated: '',
 		onTabCloseRequest: '',
+		onTabSwitchRequest: '',
 		onActivate: '',
 		onShowTooltip: '',
 		onHideTooltip: ''
@@ -28,15 +31,15 @@ enyo.kind ({
 	},
 	components: [
 		{
-			kind: "Button", // no need of onyx.RadioButton
+			kind: "enyo.Button", // no need of onyx.RadioButton
 			name: 'button',
-			ontap: 'setActiveTrue',
+			ontap: 'requestSwitch',
 			onmouseover: 'showTooltipFromTab',
 			onmouseout: 'doHideTooltip'
 		},
 		{
 			classes: 'onyx-tab-item-dissolve',
-			ontap: 'setActiveTrue',
+			ontap: 'requestSwitch',
 			name: 'dissolve',
 			showing: false,
 			onmouseover: 'showTooltipFromTab',
@@ -70,16 +73,7 @@ enyo.kind ({
 	activeChanged: function(inOldValue) {
 		// called during destruction, hence the test on this.container
 		if (this.container && this.hasNode()) {
-			var i = this.indexInContainer();
 			if (this.active) {
-				this.doTabActivated(
-					{
-						index:    i,
-						caption:  this.content,
-						userData: this.userData,
-						userId:   this.userId
-					}
-				);
 				this.raise();
 			}
 			else {
@@ -108,16 +102,26 @@ enyo.kind ({
 		}
 
 		this.$.button.applyStyle('width', width + 'px');
-		this.$.button.render();
+	},
+
+	requestSwitch: function(inSender, inEvent) {
+		var i = this.indexInContainer();
+		this.doTabSwitchRequest({
+			index:    i,
+			caption:  this.content,
+			userData: this.userData,
+			userId:   this.userId
+		});
+		return true;
 	},
 
 	requestClose: function(inSender, inEvent) {
 		this.doTabCloseRequest({ index: this.tabIndex });
 		return true;
 	},
-	
+
 	showTooltipFromTab: function(inSender, inEvent){
 		this.doShowTooltip({tooltipContent: this.tooltipMsg, bounds:this.getBounds()});
-		
+
 	}
 });
